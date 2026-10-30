@@ -1,3 +1,4 @@
+using API.Nswag;
 using Infrastructure;
 using LinqToDB;
 using LinqToDB.Data;
@@ -17,7 +18,8 @@ builder.Services.AddControllers();
 
 builder.Services.AddCors();
 
-
+builder.Services.AddOpenApiDocument(settings =>
+    settings.SchemaSettings.SchemaProcessors.Add(new RequireNotNullableSchemaProcessor()));
 
 
 var app = builder.Build();
