@@ -4,6 +4,7 @@ import { APITester } from "./APITester";
 import logo from "./logo.svg";
 import reactLogo from "./react.svg";
 import {createBrowserRouter, Outlet, RouterProvider} from "react-router";
+import {Logind} from "@/Logind.tsx";
 
 export function App() {
   return (
@@ -15,6 +16,10 @@ export function App() {
                 {
                     path:"/",
                     element:<div></div>
+                },
+                {
+                    path:"/logind",
+                    element:<Logind/>
                 }
             ]
         }
