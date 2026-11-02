@@ -26,7 +26,7 @@ export function PlatformForLogin() {
 
     const [newAccount, setNewAccount] = useState("");
     const [newPassword, setNewPassword] = useState("");
-    const[newRole, setNewRole] = useState<Role>("User");
+    const [newRole, setNewRole] = useState<Role>("User");
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -39,19 +39,75 @@ export function PlatformForLogin() {
     }
 
     async function restore() {
-        try{
-            setMe (await api<CurrentUsing>("/api/users/me"));
+        try {
+            setMe(await api<CurrentUsing>("/api/users/me"));
             await refresh()
         } catch {
             setMe(null);
         }
     }
+
     useEffect(() => {
         restore();
     }, []);
 
-}
+    async function signIn(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        setError("")
 
-export function Logind() {
-    return <div></div>
+        try {
+            await api("/API/users/signin", {
+                method: "POST",
+                body: JSON.stringify({username, password}),
+            });
+            setMe(await api<CurrentUsing>("/api/users/me"));
+            setPassword("");
+            await refresh();
+        } catch (ex) {
+            setError(ex instanceof Error ? ex.message : "Something went wrong");
+        }
+    }
+
+    async function signOut() {
+        try {
+            await api("/API/users/signout", {
+                method: "POST",
+                body: "{}"
+            });
+        } finally {
+            setAccount([]);
+            setMe(null);
+            setNotice("Logged out");
+        }
+    }
+
+    async function CreateProfile(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        setError("");
+        setNotice("");
+
+        try {
+            await api("/API/users", {
+                method: "POST",
+                body: JSON.stringify({
+                    username: newAccount,
+                    password: newPassword,
+                    role: newRole,
+                }),
+            });
+
+            setNewAccount("");
+            setNewPassword("");
+            setNewRole("User");
+            setNotice("Created Account");
+            await refresh();
+
+        } catch (ex) {
+            setError(ex instanceof Error ? ex.message : "Couldn't create account");
+        }
+    }
+}
+        export function Logind() {
+            return <div></div>
+
 }
