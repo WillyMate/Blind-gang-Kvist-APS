@@ -106,8 +106,105 @@ export function PlatformForLogin() {
             setError(ex instanceof Error ? ex.message : "Couldn't create account");
         }
     }
-}
-        export function Logind() {
-            return <div></div>
+    return (
+        <main className="login-platform">
+            <header>
+                <p className="eyebrow">Kvist &amp; Bjælke ApS</p>
+                <h1>Login platform</h1>
+                <p>Secure account access with role-based permissions.</p>
+            </header>
 
+            {error && <p className="feedback error" role="alert">{error}</p>}
+            {notice && <p className="feedback" role="status">{notice}</p>}
+
+            {!me ? (
+                <section className="auth-card">
+                    <h2>Sign in</h2>
+                    <form onSubmit={signIn}>
+                        <label>Username
+                            <input autoComplete="username" value={username}
+                                   onChange={e => setUsername(e.target.value)}
+                                   required minLength={3} maxLength={64} />
+                        </label>
+                        <label>Password
+                            <input type="password" autoComplete="current-password" value={password}
+                                   onChange={e => setPassword(e.target.value)} required />
+                        </label>
+                        <button>Sign in</button>
+                    </form>
+                </section>
+            ) : (
+                <section className="account-card">
+                    <div className="account-header">
+                        <div>
+                            <h2>Welcome, {me.userName}</h2>
+                            <span className="role-badge">{me.role}</span>
+                        </div>
+                        <button type="button" className="quiet-button" onClick={signOut}>Sign out</button>
+                    </div>
+
+                    <section className="user-table">
+                        <div className="section-header">
+                            <h3>User accounts</h3>
+                            <button type="button" className="quiet-button"
+                                    onClick={() => void refresh()}>Refresh</button>
+                        </div>
+                        <div className="table-scroll">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Created (UTC)</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {account.map(a => (
+                                    <tr key={a.id}>
+                                        <td>{String(a.userName)}</td>
+                                        <td>{a.role}</td>
+                                        <td>{new Date(a.CreatedProf).toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    {(me.role === "Admin" || me.role === "SuperUser") && (
+                        <section className="create-account">
+                            <h3>Create an account</h3>
+                            <form onSubmit={CreateProfile}>
+                                <label>Username
+                                    <input value={newAccount} onChange={e => setNewAccount(e.target.value)}
+                                           required minLength={3} maxLength={64} />
+                                </label>
+                                <label>Password (12 characters minimum)
+                                    <input type="password" value={newPassword}
+                                           onChange={e => setNewPassword(e.target.value)}
+                                           autoComplete="new-password" required minLength={12} />
+                                </label>
+                                <label>Role
+                                    <select value={newRole}
+                                            onChange={e => setNewRole(e.target.value as Role)}
+                                            disabled={me.role !== "Admin"}>
+                                        <option value="User">User</option>
+                                        <option value="SuperUser">SuperUser</option>
+                                        <option value="Admin">Admin</option>
+                                    </select>
+                                </label>
+                                <button>Create account</button>
+                            </form>
+                        </section>
+                    )}
+                </section>
+            )}
+        </main>
+    );
 }
+
+export function Logind() {
+    return <div></div>
+}
+
+

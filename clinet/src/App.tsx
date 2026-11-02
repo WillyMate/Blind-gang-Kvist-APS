@@ -1,30 +1,19 @@
-import { APITester } from "./APITester";
-//import "./index.css";
+import"./index.css";
+import {createBrowserRouter, Navigate, RouterProvider} from "react-router";
+import {Logind, PlatformForLogin} from "@/Logind.tsx";
 
-import logo from "./logo.svg";
-import reactLogo from "./react.svg";
-import {createBrowserRouter, Outlet, RouterProvider} from "react-router";
-import {Logind} from "@/Logind.tsx";
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <Navigate to = "/logind" replace />,
+    },
+    {
+        path:"/logind",
+        element: <PlatformForLogin />,
+    },
+]);
 
 export function App() {
-  return (
-    <RouterProvider router={createBrowserRouter([
-        {
-            path:"/",
-            element:<Outlet/>,
-            children: [
-                {
-                    path:"/",
-                    element:<div></div>
-                },
-                {
-                    path:"/logind",
-                    element:<Logind/>
-                }
-            ]
-        }
-    ])}/>
-  );
+    return <RouterProvider router={router} />;
 }
-
 export default App;
