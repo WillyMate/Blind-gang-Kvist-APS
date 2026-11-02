@@ -14,6 +14,7 @@ var options = new DataOptions().UseSQLite(Environment.GetEnvironmentVariable("DB
 builder.Services.AddSingleton(new DataOptions<UserDatabase>(options));
 builder.Services.AddScoped<UserDatabase>();
 builder.Services.AddScoped<DataConnection>(sp => sp.GetRequiredService<UserDatabase>());
+builder.Services.AddScoped<UserService>();
 builder.Services.AddControllers();
 
 builder.Services.AddCors();
