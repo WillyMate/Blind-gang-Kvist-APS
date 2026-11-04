@@ -1,0 +1,23 @@
+services:
+  api:
+    build: ./server
+    environment:
+      DB: "Data Source=/data/app.db"
+      Jwt__Key: ${JWT_KEY}
+      Seed__AdminUser: ${ADMIN_USER}
+      Seed__AdminPassword: ${ADMIN_PASSWORD}
+    volumes:
+      - api-data:/data
+    restart: unless-stopped
+
+  web:
+    build: ./clinet
+    ports:
+      - "8000:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  api-data:
+  
