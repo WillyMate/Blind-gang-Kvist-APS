@@ -1,39 +1,45 @@
 import { serve } from "bun";
 import index from "./index.html";
 
+
+const API_URL = process.env.API_URL ?? "http://localhost:5215";
+
 const server = serve({
   routes: {
-    // Serve index.html for all unmatched routes.
+
+    "/api/*": async (req) => {
+      const url = new URL(req.url);
+
+      const headers = new Headers(req.headers);
+      headers.delete("host");
+
+      try {
+        const upstream = await fetch(API_URL + url.pathname + url.search, {
+          method: req.method,
+          headers,
+          body:
+              req.method === "GET" || req.method === "HEAD"
+                  ? undefined
+                  : await req.arrayBuffer(),
+        });
+
+        return new Response(upstream.body, {
+          status: upstream.status,
+          headers: {
+            "content-type": upstream.headers.get("content-type") ?? "text/plain",
+          },
+        });
+      } catch {
+        return new Response("API is not reachable", { status: 502 });
+      }
+    },
+
+    // Serve index.html
     "/*": index,
-
-    "/api/hello": {
-      async GET(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "GET",
-        });
-      },
-      async PUT(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "PUT",
-        });
-      },
-    },
-
-    "/api/hello/:name": async req => {
-      const name = req.params.name;
-      return Response.json({
-        message: `Hello, ${name}!`,
-      });
-    },
   },
 
   development: process.env.NODE_ENV !== "production" && {
-    // Enable browser hot reloading in development
     hmr: true,
-
-    // Echo console logs from the browser to the server
     console: true,
   },
 });
