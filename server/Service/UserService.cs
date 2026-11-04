@@ -1,9 +1,14 @@
 ﻿using Infrastructure;
 using LinqToDB;
-using LinqToDB.Async;
 using LinqToDB.Data;
 
 namespace Service;
+
+using Infrastructure;
+using LinqToDB;
+using LinqToDB.Async;
+using LinqToDB.Data;
+
 
 public sealed class UserService
 {
@@ -23,6 +28,13 @@ public sealed class UserService
         CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(username);
+        ArgumentException.ThrowIfNullOrWhiteSpace(password);
+
+        if (password.Length < 8)
+            throw new ArgumentException("Password must be at least 8 characters");
+
+        if (await _db.GetTable<UsersDB>().AnyAsync(x => x.UserName == username, ct))
+            throw new InvalidOperationException("Username already taken");
 
         var user = new UsersDB(
             Guid.NewGuid().ToString(),
@@ -51,28 +63,14 @@ public sealed class UserService
         return ToSummary(user);
     }
 
-    public async Task<bool> VerifyPasswordAsync(
-        string username,
-        string password,
-        CancellationToken ct = default)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(username);
-
-        var user = await _db.GetTable<UsersDB>()
-            .FirstOrDefaultAsync(x => x.UserName == username, ct);
-
-        return user is not null && _passwordHasher.Verify(password, user.PasswordHash);
-    }
-
-    public async Task<bool> DeleteUserAsync(
+    public async Task<UserSummary?> GetUserAsync(
         string userId,
         CancellationToken ct = default)
     {
-        var deleted = await _db.GetTable<UsersDB>()
-            .Where(x => x.UserId == userId)
-            .DeleteAsync(ct);
+        var user = await _db.GetTable<UsersDB>()
+            .FirstOrDefaultAsync(x => x.UserId == userId, ct);
 
-        return deleted > 0;
+        return user is null ? null : ToSummary(user);
     }
 
     public async Task<bool> UpdateUserAsync(
@@ -90,6 +88,17 @@ public sealed class UserService
             .UpdateAsync(ct);
 
         return updated > 0;
+    }
+
+    public async Task<bool> DeleteUserAsync(
+        string userId,
+        CancellationToken ct = default)
+    {
+        var deleted = await _db.GetTable<UsersDB>()
+            .Where(x => x.UserId == userId)
+            .DeleteAsync(ct);
+
+        return deleted > 0;
     }
 
     public async Task<List<UserSummary>> GetAllUsersAsync(
