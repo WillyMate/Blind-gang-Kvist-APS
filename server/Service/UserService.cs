@@ -34,6 +34,23 @@ public sealed class UserService
         return ToSummary(user);
     }
 
+    public async Task<UserSummary?> LoginAsync(
+        string username,
+        string password,
+        CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(username);
+        ArgumentException.ThrowIfNullOrWhiteSpace(password);
+
+        var user = await _db.GetTable<UsersDB>()
+            .FirstOrDefaultAsync(x => x.UserName == username, ct);
+
+        if (user is null || !_passwordHasher.Verify(password, user.PasswordHash))
+            return null;
+
+        return ToSummary(user);
+    }
+
     public async Task<bool> VerifyPasswordAsync(
         string username,
         string password,
@@ -60,11 +77,19 @@ public sealed class UserService
 
     public async Task<bool> UpdateUserAsync(
         string userId,
-        UsersDB user,
+        string userName,
+        UsersDB.UserRole role,
         CancellationToken ct = default)
     {
-        user.UserId = userId;
-        return await _db.UpdateAsync(user, token: ct) > 0;
+        ArgumentException.ThrowIfNullOrWhiteSpace(userName);
+
+        var updated = await _db.GetTable<UsersDB>()
+            .Where(x => x.UserId == userId)
+            .Set(x => x.UserName, userName)
+            .Set(x => x.Role, role)
+            .UpdateAsync(ct);
+
+        return updated > 0;
     }
 
     public async Task<List<UserSummary>> GetAllUsersAsync(

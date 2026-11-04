@@ -4,10 +4,20 @@ namespace Infrastructure;
 
 public static class Seeder
 {
-    public static void seed(UserDatabase db)
+    public static void Seed(UserDatabase db, string passwordHash)
     {
-        db.CreateTable<UsersDB>(tableOptions: TableOptions.CreateIfNotExists);
-        if(db.Users().Any()) return;
-        db.Insert(new UsersDB(Guid.NewGuid().ToString(), "admin", "admin", UsersDB.UserRole.Admin));
+        db.CreateTable<UsersDB>(
+            tableOptions: TableOptions.CreateIfNotExists);
+
+        if (db.Users().Any())
+            return;
+
+        db.Insert(new UsersDB
+        {
+            UserId = Guid.NewGuid().ToString(),
+            UserName = "admin",
+            PasswordHash = passwordHash,
+            Role = UsersDB.UserRole.Admin
+        });
     }
 }

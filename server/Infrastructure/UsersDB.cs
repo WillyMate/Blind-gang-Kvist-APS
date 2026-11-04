@@ -28,7 +28,11 @@ public sealed class UsersDB
     {
     }
 
-    public UsersDB(string userId, string userName, string passwordHash, UserRole role)
+    public UsersDB(
+        string userId,
+        string userName,
+        string passwordHash,
+        UserRole role)
     {
         UserId = userId;
         UserName = userName;
