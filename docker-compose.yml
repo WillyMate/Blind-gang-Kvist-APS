@@ -12,6 +12,8 @@ services:
 
   web:
     build: ./clinet
+    environment:
+      API_URL: "http://api:8080"
     ports:
       - "8000:3000"
     depends_on:
