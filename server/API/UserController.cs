@@ -1,13 +1,4 @@
-<<<<<<< HEAD
-﻿
-using System.Security.Claims;
-using API;
 using Infrastructure;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-=======
-﻿using Infrastructure;
->>>>>>> 0a9f370 (AAA)
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service;
@@ -15,12 +6,8 @@ using Service;
 namespace API;
 
 [ApiController]
-<<<<<<< HEAD
-[Route("api/users")]
-=======
 [Route("api/[controller]")]
 [Authorize]
->>>>>>> 0a9f370 (AAA)
 public class UserController : ControllerBase
 {
     private readonly UserService _userService;
@@ -31,158 +18,6 @@ public class UserController : ControllerBase
         _userService = userService;
         _tokenService = tokenService;
     }
-<<<<<<< HEAD
-
-    // LOGIN
-    [AllowAnonymous]
-    [HttpPost("signin")]
-    public async Task<IActionResult> SignIn(
-        [FromBody] SignInDAO login,
-        CancellationToken ct)
-    {
-        var user = await _userService.AuthenticateAsync(
-            login.UserName,
-            login.Password,
-            ct
-        );
-
-        if (user is null)
-            return Unauthorized(new { message = "Invalid username or password" });
-
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, user.UserId),
-            new(ClaimTypes.Name, user.UserName),
-            new(ClaimTypes.Role, user.Role.ToString())
-        };
-
-        var identity = new ClaimsIdentity(
-            claims,
-            CookieAuthenticationDefaults.AuthenticationScheme
-        );
-
-        var principal = new ClaimsPrincipal(identity);
-
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            principal
-        );
-
-        return Ok(new UserDAO(
-            user.UserId,
-            user.UserName,
-            user.Role
-        ));
-    }
-
-    // LOGOUT
-    [AllowAnonymous]
-    [HttpPost("signout")]
-    public async Task<IActionResult> SignOutUser()
-    {
-        await HttpContext.SignOutAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme
-        );
-
-        return NoContent();
-    }
-
-    // CURRENT USER
-    [Authorize]
-    [HttpGet("me")]
-    public IActionResult GetMe()
-    {
-        return Ok(new
-        {
-            UserName = User.Identity?.Name,
-            Role = User.FindFirstValue(ClaimTypes.Role)
-        });
-    }
-
-    // GET ALL USERS
-    [Authorize(Roles = "Admin,SuperUser")]
-    [HttpGet]
-    public async Task<ActionResult<List<UserDAO>>> GetUsers(
-        CancellationToken ct)
-    {
-        var users = await _userService.GetAllUsersAsync(ct);
-
-        var result = users.Select(user =>
-            new UserDAO(
-                user.UserId,
-                user.UserName,
-                user.Role
-            )
-        ).ToList();
-
-        return Ok(result);
-    }
-
-    // CREATE USER
-    [Authorize(Roles = "Admin,SuperUser")]
-    [HttpPost]
-    public async Task<ActionResult<UserDAO>> AddUser(
-        [FromBody] CreateUserDAO newUser,
-        CancellationToken ct)
-    {
-        // SuperUsers are only allowed to create normal users.
-        var role = User.IsInRole("Admin")
-            ? newUser.Role
-            : UsersDB.UserRole.User;
-
-        var user = await _userService.CreateUserAsync(
-            newUser.UserName,
-            newUser.Password,
-            role,
-            ct
-        );
-
-        var result = new UserDAO(
-            user.UserId,
-            user.UserName,
-            user.Role
-        );
-
-        return Ok(result);
-    }
-
-    // UPDATE USER
-    [Authorize(Roles = "Admin")]
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(
-        string id,
-        [FromBody] UpdateUserDAO updatedUser,
-        CancellationToken ct)
-    {
-        var updated = await _userService.UpdateUserAsync(
-            id,
-            updatedUser.UserName,
-            updatedUser.Role,
-            ct
-        );
-
-        if (!updated)
-            return NotFound();
-
-        return NoContent();
-    }
-
-    // DELETE USER
-    [Authorize(Roles = "Admin")]
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteUser(
-        string id,
-        CancellationToken ct)
-    {
-        var deleted = await _userService.DeleteUserAsync(id, ct);
-
-        if (!deleted)
-            return NotFound();
-
-        return NoContent();
-    }
-}
-=======
 
     // Admin
     private bool CanManage(UsersDB.UserRole target) =>
@@ -245,7 +80,6 @@ public class UserController : ControllerBase
         if (existing is null)
             return NotFound();
 
-
         if (!CanManage(existing.Role) || !CanManage(dto.Role))
             return Forbid();
 
@@ -271,4 +105,3 @@ public class UserController : ControllerBase
         return ok ? NoContent() : NotFound();
     }
 }
->>>>>>> 0a9f370 (AAA)
