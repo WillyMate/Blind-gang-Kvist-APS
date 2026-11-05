@@ -3,17 +3,15 @@ using Infrastructure;
 
 namespace API;
 
-public sealed class CreateUserDAO
-{
-    [Required]
-    [MinLength(3)]
-    [MaxLength(64)]
-    public string UserName { get; set; } = string.Empty;
+public sealed record CreateUserDAO(
+    [property: Required, MinLength(3), MaxLength(64)] string UserName,
+    [property: Required, MinLength(12)] string Password,
+    UsersDB.UserRole Role = UsersDB.UserRole.User);
 
-    [Required]
-    [MinLength(12)]
-    public string Password { get; set; } = string.Empty;
+public sealed record UpdateUserDAO(
+    string UserName,
+    UsersDB.UserRole Role);
 
-    public UsersDB.UserRole Role { get; set; } =
-        UsersDB.UserRole.User;
-}
+public sealed record LoginDAO(
+    string UserName,
+    string Password);
